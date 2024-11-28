@@ -1,32 +1,218 @@
-# Prerequisites
-*.d
+#include <stdio.h>  
+#include <stdlib.h>  
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+// Definição da dimensão do tabuleiro  
+#define DIM 3  
 
-# Precompiled Headers
-*.gch
-*.pch
+// Variáveis globais para armazenar o placar  
+int vitoriasJogador1 = 0;  
+int vitoriasJogador2 = 0;  
+int empates = 0;  
+ 
+int main() {  
+    // Variáveis para armazenar o tabuleiro e os jogadores  
+    int tabuleiro[DIM][DIM];  
+    int opcao, linha, coluna, vez, jogando, vencedor, empate;  
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+    // Loop principal do programa  
+    do {  
+        // Impressão do menu principal  
+        printf("\t\tJogo da Velha Para dois Jogadores\n");  
+        printf("\t\t Selecione uma das opções\n");  
+        printf("\t\t1. Jogar\n");  
+        printf("\t\t0. Sair\n");  
+        printf("\t\tOpção: ");  
+        scanf("%d", &opcao);  
 
-# Fortran module files
-*.mod
-*.smod
+        // Verificação da opção selecionada  
+        if (opcao != 0 && opcao != 1) {  
+            // Se a opção for inválida, imprime uma mensagem de erro  
+            printf("Opção inválida! Tente novamente.\n\n");  
+            continue;  
+        }  
+        
+        // Se a opção for 1, inicia o jogo  
+        if (opcao == 1) {  
+            // Inicialização do tabuleiro  
+            for (int i = 0; i < DIM; i++) {  
+                for (int j = 0; j < DIM; j++) {  
+                    tabuleiro[i][j] = 0;  
+                }  
+            }  
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+            // Inicialização das variáveis de jogo  
+            vez = 1;  
+            jogando = 1;  
+            vencedor = 0;  
+            empate = 0;  
 
-# Executables
-*.exe
-*.out
-*.app
+            // Loop de jogo  
+            while (jogando) {  
+                // Impressão do tabuleiro  
+                printf("\n");  
+                for (int i = 0; i < DIM; i++) {  
+                    for (int j = 0; j < DIM; j++) {  
+                        if (tabuleiro[i][j] == 0)  
+                            printf("   ");  
+                        else if (tabuleiro[i][j] == 1)  
+                            printf(" X ");  
+                        else  
+                            printf(" O ");  
+
+                        if (j < DIM - 1)  
+                            printf("|");  
+                    }  
+                    printf("\n");  
+                    if (i < DIM - 1)  
+                        printf("---|---|---\n");  
+                }  
+
+                // Impressão da vez do jogador  
+                printf("\n--> Jogador %d\n", vez % 2 == 1 ? 1 : 2);  
+
+                // Entrada da linha e coluna  
+                do {  
+                    printf("Linha (1-3): ");  
+                    scanf("%d", &linha);  
+                    printf("Coluna (1-3): ");  
+                    scanf("%d", &coluna);  
+                    linha--;  
+                    coluna--;  
+
+                    // Verificação da validade da linha e coluna  
+                    if (linha < 0 || linha >= DIM || coluna < 0 || coluna >= DIM || tabuleiro[linha][coluna] != 0) {  
+                        // Se a linha ou coluna for inválida, imprime uma mensagem de erro  
+                        printf("Posição inválida ou já ocupada! Tente novamente em outra posição.\n");  
+                    } else {  
+                        break;  
+                    }  
+                } while (1);  
+
+                // Atualização do tabuleiro  
+                tabuleiro[linha][coluna] = vez % 2 == 1 ? 1 : -1;  
+
+                // Verificação da vitória  
+                for (int i = 0; i < DIM; i++) {  
+                    int soma = 0;  
+                    for (int j = 0; j < DIM; j++) {  
+                        soma += tabuleiro[i][j];  
+                    }  
+                    if (soma == DIM || soma == -DIM) {  
+                        // Se houver vitória, atualiza o vencedor e sai do loop  
+                        vencedor = vez % 2 == 1 ? 1 : 2;  
+                        jogando = 0;  
+                        break;  
+                    }  
+                }  
+
+                // Verificação da vitória nas colunas  
+                for (int j = 0; j < DIM; j++) {  
+                    int soma = 0;  
+                    for (int i = 0; i < DIM; i++) {  
+                        soma += tabuleiro[i][j];  
+                    }  
+                    if (soma == DIM || soma == -DIM) {  
+                        // Se houver vitória, atualiza o vencedor e sai do loop  
+                        vencedor = vez % 2 == 1 ? 1 : 2;  
+                        jogando = 0;  
+                        break;  
+                    }  
+                }  
+
+                // Verificação da vitória na diagonal principal  
+                int soma = 0;  
+                for (int i = 0; i < DIM; i++) {  
+                    soma += tabuleiro[i][i];  
+                }  
+                if (soma == DIM || soma == -DIM) {  
+                    // Se houver vitória, atualiza o vencedor e sai do loop  
+                    vencedor = vez % 2 == 1 ? 1 : 2;  
+                    jogando = 0;  
+                }  
+
+                // Verificação da vitória na diagonal secundária  
+                soma = 0;  
+                for (int i = 0; i < DIM; i++) {  
+                    soma += tabuleiro[i][DIM - 1 - i];  
+                }  
+                if (soma == DIM || soma == -DIM) {  
+                    // Se houver vitória, atualiza o vencedor e sai do loop  
+                    vencedor = vez % 2 == 1 ? 1 : 2;  
+                    jogando = 0;  
+                }  
+
+                // Verificação do empate  
+                empate = 1;  
+                for (int i = 0; i < DIM; i++) {  
+                    for (int j = 0; j < DIM; j++) {  
+                        if (tabuleiro[i][j] == 0) {  
+                            // Se houver espaço vazio, não é empate  
+                            empate = 0;  
+                            break;  
+                        }  
+                    }  
+                    if (!empate)  
+                        break;  
+                }  
+
+                // Se for empate, sai do loop  
+                if (empate) {  
+                    jogando = 0;  
+                }  
+
+                // Atualização da vez  
+                vez++;  
+            }  
+
+            // Impressão do tabuleiro final  
+            printf("\n");  
+            for (int i = 0; i < DIM; i++) {  
+                for (int j = 0; j < DIM; j++) {  
+                    if (tabuleiro[i][j] == 0)  
+                        printf("   ");  
+                    else if (tabuleiro[i][j] == 1)  
+                        printf(" X ");  
+                    else  
+                        printf(" O ");  
+
+                    if (j < DIM - 1)  
+                        printf("|");  
+                }  
+                printf("\n");  
+                if (i < DIM - 1)  
+                    printf("---|---|---\n");  
+            }  
+
+            // Impressão do resultado  
+            if (vencedor) {  
+                if (vencedor == 1) {  
+                    vitoriasJogador1++;  
+                } else if (vencedor == 2) {  
+                    vitoriasJogador2++;  
+                }  
+                printf("Jogador %d venceu!\n", vencedor);  
+            } else if (empate) {  
+                empates++;  
+                printf("Empate!\n");  
+            }  
+
+            // Impressão do placar  
+            printf("\nPlacar:\n");  
+            printf("Jogador 1: %d vitórias\n", vitoriasJogador1);  
+            printf("Jogador 2: %d vitórias\n", vitoriasJogador2);  
+            printf("Empates: %d\n", empates);  
+
+            // Pergunta se deseja jogar novamente  
+            printf("Deseja jogar novamente? (0-Não, 1-Sim) ");  
+            scanf("%d", &opcao);  
+            if (opcao == 0) {  
+                // Se não deseja jogar novamente, sai do loop  
+                printf("Jogo encerrado. Até a próxima!\n");  
+                break;  
+            }  
+        }  
+
+    } while (1);  
+
+    return 0;  
+}
